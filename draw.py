@@ -228,6 +228,7 @@ if select == str(5):
         print(f"r: {r}")
         print(f"counter: {counter}")
 
+    pen1 = turtle.Turtle()
     pen1.color("black")
     pen1.shape("arrow")
     pen1.shapesize(1)
