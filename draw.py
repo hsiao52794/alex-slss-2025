@@ -246,7 +246,6 @@ if select == str(5):
             n = n + 1
         ang2 = 180-(360/sides)
         ang3 = 180-(ang2+ang1)
-        import math
         L1 = math.sin(math.radians(ang3))*(L/math.sin(math.radians(ang2)))
         L2 = math.sin(math.radians(ang1))*(L/math.sin(math.radians(ang2)))
         r = (L/2)/math.cos(math.radians(ang2/2))
