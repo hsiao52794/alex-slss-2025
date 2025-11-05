@@ -5,10 +5,11 @@ print("(1)circle")
 print("(2)circle")
 print("(3)spiral")
 print("(4)fibonacci")
-print("(5)square")
+print("(5)mushroom")
+print("(6)city")
 select = input(": ")
 # just in case the user is stupid
-while select != str(1) and select != str(2) and select != str(3) and select != str(4) and select != str(5):
+while select != str(1) and select != str(2) and select != str(3) and select != str(4) and select != str(5) and select != str(6):
     print("")
     print("Please choose from the given list")
     print('(Use number 1 to 9 to select the options, and press "Enter" to confirm)')
@@ -265,6 +266,79 @@ if select == str(5):
         pen1.right(ang1)
         L = L1 + L2
         ang1 = ang1 + 1
+
+if select == str(6):
+    repeat = int(input("building: "))
+
+    window.bgcolor("black")
+
+    pen1 = turtle.Turtle()
+    pen1.color("black")
+    pen1.shape("arrow")
+    pen1.shapesize(1)
+    pen1.speed(0)
+
+    pen1.pu()
+    pen1.goto(0, -400)
+    pen1.pd()
+    pen1.color("white")
+    pen1.width(5)
+    pen1.forward(-600)
+    pen1.forward(1200)
+    pen1.forward(-600)
+    pen1.color("black")
+    pen1.width(3)
+
+    import random
+
+    def make_window():
+        pen1.pu()
+        pen1.forward(10)
+        pen1.pd()
+        color = ['yellow', 'black', 'white', 'lightblue']
+        pen1.color(random.choice(color))
+        pen1.shapesize(0.5)
+        pen1.shape("square")
+        pen1.stamp()
+        pen1.pu()
+        pen1.color("black")
+        pen1.shape("arrow")
+        pen1.shapesize(1)
+        pen1.forward(10)
+
+    #building
+    for counter in range(repeat):
+        width = random.randint(5, 10)
+        length = random.randint(21, 50)
+        location = random.randint(-700, 700)
+        if repeat-counter <= repeat/2:
+            length = random.randint(11, 20)
+            location = random.randint(-1000, 1000)
+
+        pen1.pu()
+        pen1.goto(location, -400)
+        pen1.pd()
+        pen1.fillcolor("gray")
+        pen1.begin_fill()
+        for counter in range(2):
+            pen1.forward(20*width)
+            pen1.right(-90)
+            pen1.forward(20*length)
+            pen1.right(-90)
+        pen1.end_fill()
+
+        for counter in range(length):
+            pen1.right(-90)
+            pen1.forward(10)
+            pen1.right(90)
+            for counter in range(width):
+                make_window()
+            pen1.forward(-20*width)
+            pen1.right(-90)
+            pen1.forward(10)
+            pen1.right(90)
+
+    pen1.shapesize(0.01)
 
 turtle.exitonclick()
 turtle.done
