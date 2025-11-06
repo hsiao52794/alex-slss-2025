@@ -13,14 +13,29 @@ def vote_listed_choices():
         "C. BUBBLE WAFFEL",
         "D. gong cha"
     ]
+    # bucket to hold all the votes
+    coco = 0
+    chatime = 0
+    bubble_waffel = 0
+    gong_cha = 0
     # show choices
-    print("vote for your favourite from the list.")
-    print("give the letter of your choice.")
+    print("Vote for your favourite from the list.")
+    print("Give the letter of your choice.")
     for choice in CHOICES:
         print(choice)
     # ask their choice
+    vote = input("Your vote: ").lower().strip(",.? ")
+
     # add their vote to a running
     # tally
+    if vote == "a":
+        coco = coco + 1
+    if vote == "b":
+        chatime += 1
+    if vote == "c":
+        bubble_waffel += 1
+    if vote == "d":
+        gong_cha += 1
     # give some raw scores
     # percentage
 
