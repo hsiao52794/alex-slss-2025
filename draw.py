@@ -5,7 +5,7 @@ print("(1)circle")
 print("(2)circle")
 print("(3)spiral")
 print("(4)fibonacci")
-print("(5)mushroom")
+print("(5)mooshroom")
 print("(6)city")
 select = input(": ")
 # just in case the user is stupid
