@@ -27,7 +27,7 @@ def mc():
     print(f"your total is {total}")
 
 def main():
-    mc()
+    pass
 
 if __name__ == "__main__":
     main()
