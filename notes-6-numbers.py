@@ -67,8 +67,37 @@ def vote_listed_choices():
 # give the raw score
 # give the score as percentage
 
+def chip_rater():
+    """help gather data about chip crispness and quality"""
+    # create a list of questions
+    questions = [
+        "how crispy is the chip out of five?",
+        "how tasty is the chip out of five?",
+        "how fresh is the chip out of five?"
+    ]
+
+
+    # rating total
+    total = 0
+
+    # give the user instructions
+    print("take one chip from the bag")
+    print("eat it mindfully")
+    print("give your rating")
+    # ask the user questions
+    for question in questions:
+        print(question)
+        # for each question, get their rating
+        # out of five
+        rating = int(input("your rating: ").strip(",.?!"))
+
+        # update total
+        total += rating
+    average = total / len(questions)
+    print(f"the average rating for this chip is: {average}")
+
 def main():
-    vote_listed_choices()
+    chip_rater()
 
 if __name__ == "__main__":
     main()
