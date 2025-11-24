@@ -1,6 +1,6 @@
-print("Enter the distant from spot A to the target.")
+print("Enter the distance from spot A to the target.")
 pos_A = int(input(": "))
-print("Enter the distant from spot B to the target.")
+print("Enter the distance from spot B to the target.")
 pos_B = int(input(": "))
 
 import math
