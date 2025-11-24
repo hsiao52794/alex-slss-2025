@@ -36,9 +36,12 @@ ang_b = 360 - (ang_b - 25)
 
 ang = (ang_a + ang_b) / 2
 
+print()
 print("Angle from spot A to target:")
 print(ang_a)
 print("Angle from spot B to target:")
 print(ang_b)
+print()
 print("Final angle to target:")
 print(round(ang))
+print()
