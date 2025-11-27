@@ -1,4 +1,5 @@
 repeat = int(input("repeat: "))
+auto = int(input("auto(0 or 1): "))
 
 import turtle
 
@@ -33,7 +34,6 @@ def draw():
         pen1.pu()
         pen1.goto(random.randint(-400, 400), random.randint(-400, 400))
         pen1.pd()
-        #color = random.choice(["gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "green", "green", "green", "orange", "orange", "red"])
         colors = ["gray", "green", "orange", "red"]
         weight = [84, 10, 5, 1]
         color = random.choices(colors, weights=weight, k=1)[0]
@@ -47,14 +47,6 @@ def draw():
         pen1.stamp()
 
     print(f"Green: {green}, Orange: {orange}, Red: {red}")
-
-    """
-    for _ in range(100):
-        bg_color = str(input("bg_color: "))
-        if bg_color == "stop":
-            break
-        window.bgcolor(bg_color)
-    """
 
 def clean():
     pen1.color("white")
@@ -71,12 +63,26 @@ def clean():
     pen1.end_fill()
     pen1.goto(0, 0)
 
-for i in range(100):
-    print(i+1)
-    window.bgcolor("white")
+import time
+
+a = 0
+
+if auto == 1:
     outline()
-    draw()
-    stop = str(input(":"))
-    if stop == "stop":
-        break
-    clean()
+    for i in range(10000):
+        print(i+1)
+        draw()
+        time.sleep(0.5)
+    window.exitonclick()
+
+elif auto == 0:
+    for i in range(10000):
+        print(i+1)
+        outline()
+        draw()
+        time.sleep(0.5)
+        stop = str(input(":"))
+        if stop == "stop":
+            break
+        clean()
+    window.bye()
