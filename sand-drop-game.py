@@ -14,6 +14,8 @@ if m == 1:
     print("., ., ., @, @")
     print("@, @, @, @, @")
 """
+import os
+
 #a1a2a3a4a5
 #b1b2b3b4b5
 #c1c2c3c4c5
@@ -170,6 +172,8 @@ while m > 0:
   print(c1, c2, c3, c4, c5)
   print(b1, b2, b3, b4, b5)
   print(a1, a2, a3, a4, a5)
+
+  os.system("clear")
 
   m = int(input())
 
