@@ -83,13 +83,13 @@ if __name__ == "__main__":
     # Get a list of all songs from "Taylor Swift"
     find_songs = helper_spotify.songs_by_artist("data/spotify2024.csv", artist)
     find_songs2 = helper_spotify.songs_by_artist("data/spotify2024.csv", artist)
-    find_songs3 = helper_spotify.songs_by_the("data/spotify2024.csv")
+    # find_songs3 = helper_spotify.songs_by_the("data/spotify2024.csv")
     # artist -> col 11
     sorted_ytview_songs = sort_songs(find_songs, 11, ascending=True)
     # ttview
     sorted_ttview_songs = sort_songs(find_songs2, 15, ascending=False)
-    # ttview
-    sorted_the_songs = sort_songs(find_songs3, 11, ascending=False)
+    # the
+    # sorted_the_songs = sort_songs(find_songs3, 11, ascending=False)
 
     print(f"{artist}'s Songs")
     print("---------------")
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         space_1 = " " * (len(longest_num) - len(song[15]))
 
         print(song[0], space, space_1, song[15])
-
+    """
     print("THE Songs")
     print("---------------")
     for song in sorted_the_songs:
@@ -142,3 +142,4 @@ if __name__ == "__main__":
         space_1 = " " * (len(longest_num) - len(song[11]))
 
         print(song[0], space, space_1, song[11])
+    """
