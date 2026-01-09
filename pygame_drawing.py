@@ -57,11 +57,12 @@ def game():
         PURPLE = (228, 45, 216)
         """
         for sky in range(5):
-            pygame.draw.circle(screen, (sky * 51, 0, 255), (WIDTH / 2 - 50, HEIGHT / 2 - 50), 1125 - sky * 75)
+            pygame.draw.circle(screen, (sky * 51, 0, 255), (WIDTH / 2, HEIGHT / 2), 1125 - sky * 75)
         for sky in range(5):
-            pygame.draw.circle(screen, (255, 0, 255 - 51 * sky), (WIDTH / 2 - 50, HEIGHT / 2 - 50), 750 - sky * 75)
+            pygame.draw.circle(screen, (255, 0, 255 - 51 * sky), (WIDTH / 2, HEIGHT / 2), 750 - sky * 75)
         for sky in range(5):
-            pygame.draw.circle(screen, (255, 51 * sky, 0), (WIDTH / 2 - 50, HEIGHT / 2 - 50), 375 - sky * 75)
+            pygame.draw.circle(screen, (255, 51 * sky, 0), (WIDTH / 2, HEIGHT / 2), 375 - sky * 75)
+
         pygame.draw.rect(screen, BLUE, (0, HEIGHT / 2 + 10, WIDTH, HEIGHT))
 
         for reflect in range(50):

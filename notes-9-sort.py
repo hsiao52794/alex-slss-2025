@@ -3,7 +3,6 @@
 # 4 December
 
 import helper_spotify
-from typing import T
 
 # Sorting Algorithms
 # We'll implement selection sort in two ways
@@ -85,7 +84,7 @@ if __name__ == "__main__":
     find_songs2 = helper_spotify.songs_by_artist("data/spotify2024.csv", artist)
     # find_songs3 = helper_spotify.songs_by_the("data/spotify2024.csv")
     # artist -> col 11
-    sorted_ytview_songs = sort_songs(find_songs, 11, ascending=True)
+    sorted_ytview_songs = sort_songs(find_songs, 11, ascending=False)
     # ttview
     sorted_ttview_songs = sort_songs(find_songs2, 15, ascending=False)
     # the
