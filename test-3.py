@@ -1,7 +1,6 @@
-
 # Collect Blocks
-# Author:
-# Date:
+# Author: Alex Hsiao
+# Date: Jan 15, 2026
 
 import random
 import pygame
@@ -80,22 +79,47 @@ class Mario(pygame.sprite.Sprite):
 
         # Mario faces right if and only if the previous x
         # is less than the current x
+        """
         if self.last_x < self.rect.x:
             self.image = self.image_right
         elif self.last_x > self.rect.x:
             self.image = self.image_left
+        """
 
         # Update the last_x
         self.last_x = self.rect.x
 
 class Map(pygame.sprite.Sprite):
     def __init__(self):
-        """Player sprite"""
+        """map sprite"""
         super().__init__()
 
         self.image = pygame.Surface((200, 150))
         # change the colour of our image to blue
-        self.image.fill(RED)
+        self.image.fill(GREY)
+
+        self.rect = self.image.get_rect()
+
+class Borderx(pygame.sprite.Sprite):
+    def __init__(self):
+        """map sprite"""
+        super().__init__()
+
+        self.image = pygame.Surface((4000, 2000))
+        self.image_90 = pygame.transform.rotate(self.image, 90)
+        # change the colour of our image to blue
+        self.image.fill(GREY)
+
+        self.rect = self.image.get_rect()
+
+class Bordery(pygame.sprite.Sprite):
+    def __init__(self):
+        """map sprite"""
+        super().__init__()
+
+        self.image = pygame.Surface((2000, 4000))
+        # change the colour of our image to blue
+        self.image.fill(GREY)
 
         self.rect = self.image.get_rect()
 
@@ -150,8 +174,10 @@ def game():
     pygame.init()
 
     # CONSTANTS
-    WIDTH = 960
-    HEIGHT = 540
+    WIDTH = 1920
+    centerx = int(WIDTH / 2)
+    HEIGHT = 1080
+    centery = int(HEIGHT / 2)
     SIZE = (WIDTH, HEIGHT)
 
     # Creating the Screen
@@ -164,10 +190,16 @@ def game():
 
     clock = pygame.time.Clock()
     num_enemies = 3
-    num_blocks = 200
+    num_blocks = 400
     healthbar = HealthBar()
     level = 1
     vel = 5
+    pos_x = 0
+    pos_y = 0
+    pressing_left = False
+    pressing_right = False
+    pressing_up = False
+    pressing_down = False
 
     # Create a sprite group
     all_sprites_group = pygame.sprite.Group()
@@ -176,12 +208,32 @@ def game():
     map_sprites_group = pygame.sprite.Group()
 
     # map
-    for map in range(20):
+    for map in range(50):
         map = Map()
-        map.rect.center = random.randint(-1000, 1000), random.randint(-1000, 1000)
+        map_size_x = random.randint(centerx - 2000, centerx + 2000)
+        map_size_y = random.randint(centerx - 2000, centerx + 2000)
+        map.rect.center = map_size_x, map_size_y
         map_last_center = map.rect.center
         all_sprites_group.add(map)
         map_sprites_group.add(map)
+
+    # border
+    border_up = Borderx()
+    border_up.rect.center = centerx + 0, centery + 2000
+
+    border_right = Bordery()
+    border_right.rect.center = centerx + 2000, centery + 0
+
+    border_down = Borderx()
+    border_down.rect.center = centerx + 0, centery - 2000
+
+    border_left = Bordery()
+    border_left.rect.center = centerx - 2000, centery + 0
+
+    for border in [border_up, border_right, border_down, border_left]:
+        all_sprites_group.add(border)
+        map_sprites_group.add(border)
+
 
     # Create player sprite
     player = Mario()
@@ -211,8 +263,8 @@ def game():
     for _ in range(num_blocks):
         block = Block()
         # randomize their location
-        block.rect.centerx = random.randrange(-1000, 1000)
-        block.rect.centery = random.randrange(-1000, 1000)
+        block.rect.centerx = random.randrange(centerx-2000, centerx+2000)
+        block.rect.centery = random.randrange(centery-2000, centery+2000)
         block_last_center = block.rect.center
         # add them to the sprite group
         all_sprites_group.add(block)
@@ -239,19 +291,44 @@ def game():
         keys = pygame.key.get_pressed()
 
         map_collided = pygame.sprite.spritecollide(player, map_sprites_group, False)
+
         if not map_collided:
             # shift mario a little bit
             if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-                player.rect.centerx = (WIDTH / 2) - vel * 2
-            elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-                player.rect.centerx = (WIDTH / 2) + vel * 2
-            elif keys[pygame.K_UP] or keys[pygame.K_w]:
-                player.rect.centery = (HEIGHT / 2) - vel * 2
-            elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
-                player.rect.centery = (HEIGHT / 2) + vel * 2
-            else:
-                player.rect.centerx = WIDTH / 2
-                player.rect.centery = HEIGHT / 2
+                player.rect.centerx = (WIDTH / 2) - vel
+                pressing_left = True
+                # flip mario
+                player.image = player.image_left
+            # release key detection
+            elif pressing_left and not keys[pygame.K_LEFT] and not keys[pygame.K_a]:
+                player.rect.centerx = (WIDTH / 2)
+                pressing_left = False
+
+            if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                player.rect.centerx = (WIDTH / 2) + vel
+                pressing_right = True
+                # flip mario
+                player.image = player.image_right
+            # release key detection
+            elif pressing_right and not keys[pygame.K_RIGHT] and not keys[pygame.K_d]:
+                player.rect.centerx = (WIDTH / 2)
+                pressing_right = False
+
+            if keys[pygame.K_UP] or keys[pygame.K_w]:
+                player.rect.centery = (HEIGHT / 2) - vel
+                pressing_up = True
+            # release key detection
+            elif pressing_up and not keys[pygame.K_UP] and not keys[pygame.K_w]:
+                player.rect.centery = (HEIGHT / 2)
+                pressing_up = False
+
+            if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+                player.rect.centery = (HEIGHT / 2) + vel
+                pressing_down = True
+            # release key detection
+            elif pressing_down and not keys[pygame.K_DOWN] and not keys[pygame.K_s]:
+                player.rect.centery = (HEIGHT / 2)
+                pressing_down = False
 
             # map move
             for map in map_sprites_group:
@@ -262,7 +339,7 @@ def game():
 
             for enemies in enemy_sprites_group:
                 move(enemies, vel)
-            
+
         """
         # collision detection
         map_collided = pygame.sprite.spritecollide(player, map_sprites_group, False)
@@ -273,7 +350,7 @@ def game():
             enemies.rect.center = enemy_last_center
         else:
             vel = 5
-        
+
         map_last_center = map.rect.center
         block_last_center = blocks.rect.center
         enemy_last_center = enemies.rect.center
