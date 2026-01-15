@@ -150,8 +150,8 @@ def game():
     pygame.init()
 
     # CONSTANTS
-    WIDTH = 800
-    HEIGHT = 600
+    WIDTH = 960
+    HEIGHT = 540
     SIZE = (WIDTH, HEIGHT)
 
     # Creating the Screen
@@ -164,9 +164,10 @@ def game():
 
     clock = pygame.time.Clock()
     num_enemies = 3
-    num_blocks = 100
+    num_blocks = 200
     healthbar = HealthBar()
     level = 1
+    vel = 5
 
     # Create a sprite group
     all_sprites_group = pygame.sprite.Group()
@@ -178,6 +179,7 @@ def game():
     for map in range(20):
         map = Map()
         map.rect.center = random.randint(-1000, 1000), random.randint(-1000, 1000)
+        map_last_center = map.rect.center
         all_sprites_group.add(map)
         map_sprites_group.add(map)
 
@@ -186,6 +188,8 @@ def game():
     # Place Mario in the middle of the screen
     player.rect.centerx = WIDTH / 2
     player.rect.centery = HEIGHT / 2
+    player_last_x = player.rect.centerx
+    player_last_y = player.rect.centery
     all_sprites_group.add(player)
 
     # Create Enemies
@@ -195,6 +199,7 @@ def game():
         random_x = random.randrange(20, 100)
         random_y = random.randrange(HEIGHT-100, HEIGHT-20)
         enemy_one.rect.center = random_x, random_y
+        enemy_last_center = enemy_one.rect.center
         # Randomize velocity
         enemy_one.vel_x = random.choice([-3, -2, -1, 1, 2, 3])
         enemy_one.vel_y = random.choice([-3, -2, -1, 1, 2, 3])
@@ -208,9 +213,15 @@ def game():
         # randomize their location
         block.rect.centerx = random.randrange(-1000, 1000)
         block.rect.centery = random.randrange(-1000, 1000)
+        block_last_center = block.rect.center
         # add them to the sprite group
         all_sprites_group.add(block)
         block_sprites_group.add(block)
+
+    # delete overlapped map/blocks
+    map_collided = pygame.sprite.spritecollide(player, map_sprites_group, True)
+    for map in map_sprites_group:
+        blocks_collided = pygame.sprite.spritecollide(map, block_sprites_group, True)
 
     # ------------ MAIN GAME LOOP
     while not done:
@@ -224,36 +235,49 @@ def game():
         all_sprites_group.update()
         healthbar.set_health(player.show_health_percentage())
 
-        vel = 5
-
         # mario move
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            player.rect.centerx = (WIDTH / 2) - vel
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            player.rect.centerx = (WIDTH / 2) + vel
-        if keys[pygame.K_UP] or keys[pygame.K_w]:
-            player.rect.centery = (HEIGHT / 2) - vel
-        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            player.rect.centery = (HEIGHT / 2) + vel
-
-        # map move
-        for map in map_sprites_group:
-            move(map, 5)
-            # collision detection
-            """
-            if player.rect.colliderect(map.rect):
-                move(map, 0)
+        map_collided = pygame.sprite.spritecollide(player, map_sprites_group, False)
+        if not map_collided:
+            # shift mario a little bit
+            if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+                player.rect.centerx = (WIDTH / 2) - vel * 2
+            elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                player.rect.centerx = (WIDTH / 2) + vel * 2
+            elif keys[pygame.K_UP] or keys[pygame.K_w]:
+                player.rect.centery = (HEIGHT / 2) - vel * 2
+            elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
+                player.rect.centery = (HEIGHT / 2) + vel * 2
             else:
-                move(map, 5)
-            """
+                player.rect.centerx = WIDTH / 2
+                player.rect.centery = HEIGHT / 2
 
-        for blocks in block_sprites_group:
-            move(blocks, 5)
+            # map move
+            for map in map_sprites_group:
+                move(map, vel)
 
-        for enemies in enemy_sprites_group:
-            move(enemies, 5)
+            for blocks in block_sprites_group:
+                move(blocks, vel)
+
+            for enemies in enemy_sprites_group:
+                move(enemies, vel)
+            
+        """
+        # collision detection
+        map_collided = pygame.sprite.spritecollide(player, map_sprites_group, False)
+        if map_collided:
+            vel = 0
+            map.rect.center = map_last_center
+            blocks.rect.center = block_last_center
+            enemies.rect.center = enemy_last_center
+        else:
+            vel = 5
+        
+        map_last_center = map.rect.center
+        block_last_center = blocks.rect.center
+        enemy_last_center = enemies.rect.center
+        """
 
         # Keep the enemies inside the screen
         for enemy in enemy_sprites_group:
