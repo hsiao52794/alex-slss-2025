@@ -90,12 +90,22 @@ class Mario(pygame.sprite.Sprite):
         # Update the last_x
         self.last_x = self.rect.x
 
+class Tree_bottom(pygame.sprite.Sprite):
+    def __init__(self):
+        """map sprite"""
+        super().__init__()
+
+        self.image = pygame.Surface((75, 75))
+        # change the colour of our image to blue
+        self.image.fill(BROWN)
+
+        self.rect = self.image.get_rect()
 class Tree(pygame.sprite.Sprite):
     def __init__(self):
         """map sprite"""
         super().__init__()
 
-        self.image = pygame.Surface((50, 50))
+        self.image = pygame.Surface((75, 75))
         # change the colour of our image to blue
         self.image.fill(BROWN)
 
@@ -105,7 +115,7 @@ class Leaf(pygame.sprite.Sprite):
         """map sprite"""
         super().__init__()
 
-        self.image = pygame.Surface((300, 300))
+        self.image = pygame.Surface((600, 600))
         # change the colour of our image to blue
         self.image.fill(GREEN)
 
@@ -151,6 +161,7 @@ class Enemy(pygame.sprite.Sprite):
         super().__init__()
 
         self.image = pygame.image.load("assets/goomba-nes.png")
+        self.image = pygame.transform.scale_by(self.image, 2)
         self.rect = self.image.get_rect()
         # No initial location -> (0, 0)
 
@@ -229,6 +240,7 @@ def game():
     # Create a sprite group
     all_sprites_group = pygame.sprite.Group()
     block_sprites_group = pygame.sprite.Group()
+    push_block_sprites_group = pygame.sprite.Group()
     enemy_sprites_group = pygame.sprite.Group()
     map_sprites_group = pygame.sprite.Group()
     tree_sprites_group = pygame.sprite.Group()
@@ -243,6 +255,17 @@ def game():
         map_last_center = map.rect.center
         all_sprites_group.add(map)
         map_sprites_group.add(map)
+
+    # push-able blocks
+    for push_block in range(20):
+        push_block = Map()
+        push_block.image.fill(BLACK)
+        push_block_size_x = random.randint(centerx - 2000, centerx + 2000)
+        push_block_size_y = random.randint(centery - 2000, centery + 2000)
+        push_block.rect.center = push_block_size_x, push_block_size_y
+        push_block_last_center = push_block.rect.center
+        all_sprites_group.add(push_block)
+        push_block_sprites_group.add(push_block)
 
     # border
     border_up = Borderx()
@@ -275,8 +298,8 @@ def game():
         enemy_one.rect.center = random_x, random_y
         enemy_last_center = enemy_one.rect.center
         # Randomize velocity
-        enemy_one.vel_x = random.choice([-3, -2, -1, 1, 2, 3])
-        enemy_one.vel_y = random.choice([-3, -2, -1, 1, 2, 3])
+        enemy_one.vel_x = random.choice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5])
+        enemy_one.vel_y = random.choice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5])
 
         all_sprites_group.add(enemy_one)
         enemy_sprites_group.add(enemy_one)
@@ -297,11 +320,17 @@ def game():
         pass
         pos_tree = (random.randint(centerx - 2000, centerx + 2000), random.randint(centery - 2000, centery + 2000))
         # spawn_tree(pos_tree)
-        test_pos = (WIDTH / 2, HEIGHT / 2)
-        spawn_tree(test_pos)
 
+    test_pos = (WIDTH / 2, HEIGHT / 2)
+    # tree bottom
+    # from here to the next # is functioning... for now, i guess
+    tree_bottom = Tree_bottom()
+    tree_bottom.rect.center = test_pos
+
+    all_sprites_group.add(tree_bottom)
+    map_sprites_group.add(tree_bottom)
     # tree height
-    for i in range(6):
+    for i in range(20):
         tree = Tree()
         tree.rect.center = test_pos
 
@@ -342,18 +371,23 @@ def game():
             for map in map_sprites_group:
                 move(map, vel)
 
+            for push_block in push_block_sprites_group:
+                move(push_block, vel)
+
             for blocks in block_sprites_group:
                 move(blocks, vel)
 
             for enemies in enemy_sprites_group:
                 move(enemies, vel)
 
-            height_tree = vel + 0
+            height_tree = vel - 1
             for tree in tree_sprites_group:
-                height_tree += 0.5
+                height_tree += 1
                 move(tree, height_tree)
-                move(leaf, 6)
-                
+                move(leaf, 1)
+            height_tree = vel + 0
+
+
         # shift mario a little bit
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             player.rect.centerx = (WIDTH / 2) - vel * 2
@@ -412,15 +446,34 @@ def game():
         for enemy in enemy_sprites_group:
             # x-axis and y-axis bounce
             enemy_collide_map = pygame.sprite.spritecollide(enemy, map_sprites_group, False)
-            if enemy_collide_map:
-                if map.rect.left < enemy.rect.centerx < map.rect.right:
-                    #  and map.rect.left < enemy.rect.centerx < map.rect.right
-                    #enemy.vel_y = -enemy.vel_y
+
+            for map in enemy_collide_map:
+                # x collision - left to right
+                if enemy.vel_x > 0:
                     enemy.vel_x = -enemy.vel_x
-                if map.rect.top < enemy.rect.centery < map.rect.bottom:
-                    #  and map.rect.top < enemy.rect.centery < map.rect.bottom
-                    #enemy.vel_x = -enemy.vel_x
+                    enemy.rect.right = map.rect.left - 1
+                # x collision - right to left
+                elif enemy.vel_x < 0:
+                    enemy.vel_x = -enemy.vel_x
+                    enemy.rect.left = map.rect.right + 1
+                # y collision - bottom to top
+                elif enemy.vel_y > 0:
                     enemy.vel_y = -enemy.vel_y
+                    enemy.rect.bottom = map.rect.top - 1
+                # y collision - top to bottom
+                elif enemy.vel_y < 0:
+                    enemy.vel_y = -enemy.vel_y
+                    enemy.rect.top = map.rect.bottom + 1
+
+            # if enemy_collide_map:
+            #     if map.rect.left < enemy.rect.centerx < map.rect.right:
+            #         #  and map.rect.left < enemy.rect.centerx < map.rect.right
+            #         #enemy.vel_y = -enemy.vel_y
+            #         enemy.vel_x = -enemy.vel_x
+            #     if map.rect.top < enemy.rect.centery < map.rect.bottom:
+            #         #  and map.rect.top < enemy.rect.centery < map.rect.bottom
+            #         #enemy.vel_x = -enemy.vel_x
+            #         enemy.vel_y = -enemy.vel_y
 
             """
             enemy_collide_map = pygame.sprite.spritecollide(enemy, map_sprites_group, False)
@@ -459,12 +512,15 @@ def game():
 
             for _ in range(num_blocks):
                 block = Block()
-                block.rect.center = random.randrange(0, WIDTH), random.randrange(0, HEIGHT)
+                block.rect.center = (random.randint(centerx - 2000, centerx + 2000), random.randint(centery - 2000, centery + 2000))
 
                 block.level_up(level)
 
                 all_sprites_group.add(block)
                 block_sprites_group.add(block)
+                # delet over lapped blocks
+            for map in map_sprites_group:
+                blocks_collided = pygame.sprite.spritecollide(map, block_sprites_group, True)
 
             enemy = Enemy()
             enemy.vel_x, enemy.vel_y = random.choice([-5, -3, -1, 1, 3, 5]), random.choice([-5, -3, -1, 1, 3, 5])
