@@ -15,6 +15,30 @@ BLUE  = (  0,   0, 255)
 GREY  = (128, 128, 128)
 BROWN = (153,  76,   0)
 
+# CONSTANTS
+WIDTH = 1920
+centerx = int(WIDTH / 2)
+HEIGHT = 1080
+centery = int(HEIGHT / 2)
+SIZE = (WIDTH, HEIGHT)
+map_size = 2000
+
+# Creating the Screen
+screen = pygame.display.set_mode(SIZE)
+pygame.display.set_caption("Collect Blocks")
+pygame.mouse.set_visible(True)
+
+# Create a sprite group
+all_sprites_group = pygame.sprite.Group()
+block_sprites_group = pygame.sprite.Group()
+push_block_sprites_group = pygame.sprite.Group()
+enemy_sprites_group = pygame.sprite.Group()
+map_sprites_group = pygame.sprite.Group()
+tree_sprites_group = pygame.sprite.Group()
+env_sprites_group = pygame.sprite.Group()
+
+
+
 class Block(pygame.sprite.Sprite):
     def __init__(self):
         """A blue block"""
@@ -137,7 +161,7 @@ class Borderx(pygame.sprite.Sprite):
         """map sprite"""
         super().__init__()
 
-        self.image = pygame.Surface((4000, 2000))
+        self.image = pygame.Surface((map_size * 2, map_size))
         self.image_90 = pygame.transform.rotate(self.image, 90)
         # change the colour of our image to blue
         self.image.fill(GREY)
@@ -149,7 +173,7 @@ class Bordery(pygame.sprite.Sprite):
         """map sprite"""
         super().__init__()
 
-        self.image = pygame.Surface((2000, 4000))
+        self.image = pygame.Surface((map_size, map_size * 2))
         # change the colour of our image to blue
         self.image.fill(GREY)
 
@@ -206,15 +230,42 @@ def move(sprite, vel: int):
 def spawn_tree(pos: int):
     pass
 
+def spawn_push_blocks(amount: int):
+    for push_block in range(int(amount)):
+        push_block = Map()
+        push_block.image.fill(BLACK)
+        push_block_size_x = random.randint(centerx - map_size, centerx + map_size)
+        push_block_size_y = random.randint(centery - map_size, centery + map_size)
+        push_block.rect.center = push_block_size_x, push_block_size_y
+        push_block_last_center = push_block.rect.center
+        all_sprites_group.add(push_block)
+        push_block_sprites_group.add(push_block)
+
+def spawn_map(amount: int):
+    for map in range(int(amount)):
+        map = Map()
+        map_size_x = random.randint(centerx - map_size, centerx + map_size)
+        map_size_y = random.randint(centery - map_size, centery + map_size)
+        map.rect.center = map_size_x, map_size_y
+        map_last_center = map.rect.center
+        all_sprites_group.add(map)
+        map_sprites_group.add(map)
+
+def spawn_border():
+    border_up = Borderx()
+    border_up.rect.center = centerx + 0, centery + map_size
+    border_right = Bordery()
+    border_right.rect.center = centerx + map_size, centery + 0
+    border_down = Borderx()
+    border_down.rect.center = centerx + 0, centery - map_size
+    border_left = Bordery()
+    border_left.rect.center = centerx - map_size, centery + 0
+    for border in [border_up, border_right, border_down, border_left]:
+        all_sprites_group.add(border)
+        map_sprites_group.add(border)
+
 def game():
     pygame.init()
-
-    # CONSTANTS
-    WIDTH = 1920
-    centerx = int(WIDTH / 2)
-    HEIGHT = 1080
-    centery = int(HEIGHT / 2)
-    SIZE = (WIDTH, HEIGHT)
 
     # Creating the Screen
     screen = pygame.display.set_mode(SIZE)
@@ -225,8 +276,8 @@ def game():
     done = False
 
     clock = pygame.time.Clock()
-    num_enemies = 3
-    num_blocks = 400
+    num_enemies = round(3 * (map_size / 1000))
+    num_blocks = round(map_size / 5)
     healthbar = HealthBar()
     level = 1
     vel = 5
@@ -237,48 +288,14 @@ def game():
     pressing_up = False
     pressing_down = False
 
-    # Create a sprite group
-    all_sprites_group = pygame.sprite.Group()
-    block_sprites_group = pygame.sprite.Group()
-    push_block_sprites_group = pygame.sprite.Group()
-    enemy_sprites_group = pygame.sprite.Group()
-    map_sprites_group = pygame.sprite.Group()
-    tree_sprites_group = pygame.sprite.Group()
-    env_sprites_group = pygame.sprite.Group()
+    # push-able blocks
+    # spawn_push_blocks(map_size / 50)
 
     # map
-    for map in range(50):
-        map = Map()
-        map_size_x = random.randint(centerx - 2000, centerx + 2000)
-        map_size_y = random.randint(centery - 2000, centery + 2000)
-        map.rect.center = map_size_x, map_size_y
-        map_last_center = map.rect.center
-        all_sprites_group.add(map)
-        map_sprites_group.add(map)
-
-    # push-able blocks
-    for push_block in range(20):
-        push_block = Map()
-        push_block.image.fill(BLACK)
-        push_block_size_x = random.randint(centerx - 2000, centerx + 2000)
-        push_block_size_y = random.randint(centery - 2000, centery + 2000)
-        push_block.rect.center = push_block_size_x, push_block_size_y
-        push_block_last_center = push_block.rect.center
-        all_sprites_group.add(push_block)
-        push_block_sprites_group.add(push_block)
+    spawn_map(map_size / 40)
 
     # border
-    border_up = Borderx()
-    border_up.rect.center = centerx + 0, centery + 2000
-    border_right = Bordery()
-    border_right.rect.center = centerx + 2000, centery + 0
-    border_down = Borderx()
-    border_down.rect.center = centerx + 0, centery - 2000
-    border_left = Bordery()
-    border_left.rect.center = centerx - 2000, centery + 0
-    for border in [border_up, border_right, border_down, border_left]:
-        all_sprites_group.add(border)
-        map_sprites_group.add(border)
+    spawn_border()
 
     # Create player sprite
     player = Mario()
@@ -308,8 +325,8 @@ def game():
     for _ in range(num_blocks):
         block = Block()
         # randomize their location
-        block.rect.centerx = random.randrange(centerx-2000, centerx+2000)
-        block.rect.centery = random.randrange(centery-2000, centery+2000)
+        block.rect.centerx = random.randrange(centerx-map_size, centerx+map_size)
+        block.rect.centery = random.randrange(centery-map_size, centery+map_size)
         block_last_center = block.rect.center
         # add them to the sprite group
         all_sprites_group.add(block)
@@ -318,7 +335,7 @@ def game():
     # build tree
     for i in range(10):
         pass
-        pos_tree = (random.randint(centerx - 2000, centerx + 2000), random.randint(centery - 2000, centery + 2000))
+        pos_tree = (random.randint(centerx - map_size, centerx + map_size), random.randint(centery - map_size, centery + map_size))
         # spawn_tree(pos_tree)
 
     test_pos = (WIDTH / 2, HEIGHT / 2)
@@ -348,6 +365,7 @@ def game():
     map_collided = pygame.sprite.spritecollide(player, map_sprites_group, True)
     for map in map_sprites_group:
         blocks_collided = pygame.sprite.spritecollide(map, block_sprites_group, True)
+    push_blocks_collided = pygame.sprite.spritecollide(player, push_block_sprites_group, True)
 
     # ------------ MAIN GAME LOOP
     while not done:
@@ -365,14 +383,22 @@ def game():
         keys = pygame.key.get_pressed()
 
         map_collided = pygame.sprite.spritecollide(player, map_sprites_group, False)
+        # pushing_blocks = pygame.sprite.spritecollide(player, push_block_sprites_group, False)
+
+        """
+        # blocks wont move when touched
+        if pushing_blocks:
+            for push_block in pushing_blocks:
+                move(push_block, 0)
+        else:
+            for push_block in push_block_sprites_group:
+                move(push_block, vel)
+        """
 
         if not map_collided:
             # map move
             for map in map_sprites_group:
                 move(map, vel)
-
-            for push_block in push_block_sprites_group:
-                move(push_block, vel)
 
             for blocks in block_sprites_group:
                 move(blocks, vel)
@@ -457,13 +483,13 @@ def game():
                     enemy.vel_x = -enemy.vel_x
                     enemy.rect.left = map.rect.right + 1
                 # y collision - bottom to top
-                elif enemy.vel_y > 0:
+                if enemy.vel_y > 0:
                     enemy.vel_y = -enemy.vel_y
-                    enemy.rect.bottom = map.rect.top - 1
+                    enemy.rect.bottom = map.rect.top - 5
                 # y collision - top to bottom
                 elif enemy.vel_y < 0:
                     enemy.vel_y = -enemy.vel_y
-                    enemy.rect.top = map.rect.bottom + 1
+                    enemy.rect.top = map.rect.bottom + 5
 
             # if enemy_collide_map:
             #     if map.rect.left < enemy.rect.centerx < map.rect.right:
@@ -512,7 +538,7 @@ def game():
 
             for _ in range(num_blocks):
                 block = Block()
-                block.rect.center = (random.randint(centerx - 2000, centerx + 2000), random.randint(centery - 2000, centery + 2000))
+                block.rect.center = (random.randint(centerx - map_size, centerx + map_size), random.randint(centery - map_size, centery + map_size))
 
                 block.level_up(level)
 
