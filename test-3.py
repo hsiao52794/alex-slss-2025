@@ -33,7 +33,10 @@ all_sprites_group = pygame.sprite.Group()
 block_sprites_group = pygame.sprite.Group()
 push_block_sprites_group = pygame.sprite.Group()
 enemy_sprites_group = pygame.sprite.Group()
+white_map_sprites_group = pygame.sprite.Group()
+black_map_sprites_group = pygame.sprite.Group()
 map_sprites_group = pygame.sprite.Group()
+border_sprites_group = pygame.sprite.Group()
 tree_sprites_group = pygame.sprite.Group()
 env_sprites_group = pygame.sprite.Group()
 
@@ -111,6 +114,23 @@ class Mario(pygame.sprite.Sprite):
             self.image = self.image_left
         """
 
+        # Update the last_x
+        self.last_x = self.rect.x
+
+class Circle(pygame.sprite.Sprite):
+    def __init__(self):
+        """Player sprite"""
+        super().__init__()
+
+        # Two copies of image: right-facing and left-facing
+        self.image = pygame.drawcircle(pygame.Surface((50, 50)), WHITE, (25, 25), 25)
+        self.image = self.image
+        self.rect = self.image.get_rect()
+
+        # Keep track of last x-coord
+        self.last_x = 0
+
+    def update(self):
         # Update the last_x
         self.last_x = self.rect.x
 
@@ -202,9 +222,10 @@ class Enemy(pygame.sprite.Sprite):
 
     def update(self):
         # movement in the x- and y-axis
-        self.rect.x += self.vel_x
-        self.rect.y += self.vel_y
+        # self.rect.x += self.vel_x
+        #self.rect.y += self.vel_y
         # TODO: randomize movement
+        pass
 
 class HealthBar(pygame.Surface):
     def __init__(self):
@@ -233,22 +254,26 @@ def spawn_tree(pos: int):
 def spawn_push_blocks(amount: int):
     for push_block in range(int(amount)):
         push_block = Map()
-        push_block.image.fill(BLACK)
+        push_block.image.fill(WHITE)
         push_block_size_x = random.randint(centerx - map_size, centerx + map_size)
         push_block_size_y = random.randint(centery - map_size, centery + map_size)
         push_block.rect.center = push_block_size_x, push_block_size_y
         push_block_last_center = push_block.rect.center
         all_sprites_group.add(push_block)
+        white_map_sprites_group.add(push_block)
         push_block_sprites_group.add(push_block)
+        map_sprites_group.add(push_block)
 
 def spawn_map(amount: int):
     for map in range(int(amount)):
         map = Map()
+        map.image.fill(BLACK)
         map_size_x = random.randint(centerx - map_size, centerx + map_size)
         map_size_y = random.randint(centery - map_size, centery + map_size)
         map.rect.center = map_size_x, map_size_y
         map_last_center = map.rect.center
         all_sprites_group.add(map)
+        black_map_sprites_group.add(map)
         map_sprites_group.add(map)
 
 def spawn_border():
@@ -262,7 +287,7 @@ def spawn_border():
     border_left.rect.center = centerx - map_size, centery + 0
     for border in [border_up, border_right, border_down, border_left]:
         all_sprites_group.add(border)
-        map_sprites_group.add(border)
+        border_sprites_group.add(border)
 
 def game():
     pygame.init()
@@ -287,12 +312,19 @@ def game():
     pressing_right = False
     pressing_up = False
     pressing_down = False
+    pressing_space = False
+
+    # light
+    pygame.draw.circle(pygame.Surface((50, 50)), WHITE, (0, 0), 25)
+    #light = Circle()
+    #light.rect.center = WIDTH / 2, HEIGHT / 2
+    #all_sprites_group.add(light)
 
     # push-able blocks
-    # spawn_push_blocks(map_size / 50)
+    spawn_push_blocks(round(int(map_size / 50)))
 
     # map
-    spawn_map(map_size / 40)
+    spawn_map(round(int(map_size / 40)))
 
     # border
     spawn_border()
@@ -308,18 +340,18 @@ def game():
 
     # Create Enemies
     for _ in range(num_enemies):
-        enemy_one = Enemy()
+        enemy = Enemy()
         # Randomize position at bottom-left
-        random_x = random.randrange(20, 100)
-        random_y = random.randrange(HEIGHT-100, HEIGHT-20)
-        enemy_one.rect.center = random_x, random_y
-        enemy_last_center = enemy_one.rect.center
+        random_x = random.randrange(centerx-map_size, centerx+map_size)
+        random_y = random.randrange(centerx-map_size, centerx+map_size)
+        enemy.rect.center = random_x, random_y
+        enemy_last_center = enemy.rect.center
         # Randomize velocity
-        enemy_one.vel_x = random.choice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5])
-        enemy_one.vel_y = random.choice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5])
+        enemy.vel_x = random.choice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5])
+        enemy.vel_y = random.choice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5])
 
-        all_sprites_group.add(enemy_one)
-        enemy_sprites_group.add(enemy_one)
+        all_sprites_group.add(enemy)
+        enemy_sprites_group.add(enemy)
 
     # Create 100 blocks
     for _ in range(num_blocks):
@@ -365,8 +397,9 @@ def game():
     map_collided = pygame.sprite.spritecollide(player, map_sprites_group, True)
     for map in map_sprites_group:
         blocks_collided = pygame.sprite.spritecollide(map, block_sprites_group, True)
-    push_blocks_collided = pygame.sprite.spritecollide(player, push_block_sprites_group, True)
 
+    # temp
+    a = 1
     # ------------ MAIN GAME LOOP
     while not done:
         # ------ MAIN EVENT LISTENER
@@ -374,7 +407,7 @@ def game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
-
+        pygame.draw.circle(pygame.Surface((50, 50)), WHITE, (0, 0), 25)
         # ------ GAME LOGIC
         all_sprites_group.update()
         healthbar.set_health(player.show_health_percentage())
@@ -382,7 +415,12 @@ def game():
         # mario move
         keys = pygame.key.get_pressed()
 
-        map_collided = pygame.sprite.spritecollide(player, map_sprites_group, False)
+        if a == 1:
+            map_collided = pygame.sprite.spritecollide(enemy, white_map_sprites_group, False)
+        else:
+            map_collided = pygame.sprite.spritecollide(enemy, black_map_sprites_group, False)
+
+
         # pushing_blocks = pygame.sprite.spritecollide(player, push_block_sprites_group, False)
 
         """
@@ -397,8 +435,14 @@ def game():
 
         if not map_collided:
             # map move
-            for map in map_sprites_group:
-                move(map, vel)
+            for push_block in white_map_sprites_group:
+                move(push_block, vel)
+
+            for black_map in black_map_sprites_group:
+                move(black_map, vel)
+
+            for border in border_sprites_group:
+                move(border, vel)
 
             for blocks in block_sprites_group:
                 move(blocks, vel)
@@ -417,61 +461,54 @@ def game():
         # shift mario a little bit
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             player.rect.centerx = (WIDTH / 2) - vel * 2
+            #light.rect.centerx = player.rect.centerx
             pressing_left = True
             # flip mario
             player.image = player.image_left
         # release key detection
         elif pressing_left and not keys[pygame.K_LEFT] and not keys[pygame.K_a]:
             player.rect.centerx = (WIDTH / 2)
+            #light.rect.centerx = player.rect.centerx
             pressing_left = False
 
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             player.rect.centerx = (WIDTH / 2) + vel * 2
+            #light.rect.centerx = player.rect.centerx
             pressing_right = True
             # flip mario
             player.image = player.image_right
         # release key detection
         elif pressing_right and not keys[pygame.K_RIGHT] and not keys[pygame.K_d]:
             player.rect.centerx = (WIDTH / 2)
+            #light.rect.centerx = player.rect.centerx
             pressing_right = False
 
         if keys[pygame.K_UP] or keys[pygame.K_w]:
             player.rect.centery = (HEIGHT / 2) - vel * 2
+            #light.rect.centery = player.rect.centery
             pressing_up = True
         # release key detection
         elif pressing_up and not keys[pygame.K_UP] and not keys[pygame.K_w]:
             player.rect.centery = (HEIGHT / 2)
+            #light.rect.centery = player.rect.centery
             pressing_up = False
 
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
             player.rect.centery = (HEIGHT / 2) + vel * 2
+            #light.rect.centery = player.rect.centery
             pressing_down = True
         # release key detection
         elif pressing_down and not keys[pygame.K_DOWN] and not keys[pygame.K_s]:
             player.rect.centery = (HEIGHT / 2)
+            #light.rect.centery = player.rect.centery
             pressing_down = False
 
-
-        """
-        # collision detection
-        map_collided = pygame.sprite.spritecollide(player, map_sprites_group, False)
-        if map_collided:
-            vel = 0
-            map.rect.center = map_last_center
-            blocks.rect.center = block_last_center
-            enemies.rect.center = enemy_last_center
-        else:
-            vel = 5
-
-        map_last_center = map.rect.center
-        block_last_center = blocks.rect.center
-        enemy_last_center = enemies.rect.center
-        """
-
-        # Keep the enemies inside the map
         for enemy in enemy_sprites_group:
-            # x-axis and y-axis bounce
-            enemy_collide_map = pygame.sprite.spritecollide(enemy, map_sprites_group, False)
+            enemy.rect.x += enemy.vel_x
+            if a == 1:
+                enemy_collide_map = pygame.sprite.spritecollide(enemy, white_map_sprites_group, False)
+            else:
+                enemy_collide_map = pygame.sprite.spritecollide(enemy, black_map_sprites_group, False)
 
             for map in enemy_collide_map:
                 # x collision - left to right
@@ -482,41 +519,21 @@ def game():
                 elif enemy.vel_x < 0:
                     enemy.vel_x = -enemy.vel_x
                     enemy.rect.left = map.rect.right + 1
-                # y collision - bottom to top
-                if enemy.vel_y > 0:
-                    enemy.vel_y = -enemy.vel_y
-                    enemy.rect.bottom = map.rect.top - 5
-                # y collision - top to bottom
-                elif enemy.vel_y < 0:
+
+            enemy.rect.y += enemy.vel_y
+            if a == 1:
+                enemy_collide_map = pygame.sprite.spritecollide(enemy, white_map_sprites_group, False)
+            else:
+                enemy_collide_map = pygame.sprite.spritecollide(enemy, black_map_sprites_group, False)
+
+            for map in enemy_collide_map:
+                if enemy.vel_y < 0:
                     enemy.vel_y = -enemy.vel_y
                     enemy.rect.top = map.rect.bottom + 5
-
-            # if enemy_collide_map:
-            #     if map.rect.left < enemy.rect.centerx < map.rect.right:
-            #         #  and map.rect.left < enemy.rect.centerx < map.rect.right
-            #         #enemy.vel_y = -enemy.vel_y
-            #         enemy.vel_x = -enemy.vel_x
-            #     if map.rect.top < enemy.rect.centery < map.rect.bottom:
-            #         #  and map.rect.top < enemy.rect.centery < map.rect.bottom
-            #         #enemy.vel_x = -enemy.vel_x
-            #         enemy.vel_y = -enemy.vel_y
-
-            """
-            enemy_collide_map = pygame.sprite.spritecollide(enemy, map_sprites_group, False)
-            if enemy_collide_map:
-                if enemy.rect.top < map.rect.bottom and enemy.rect.bottom > map.rect.top:
-                    #  and map.rect.left < enemy.rect.center < map.rect.right
+                # y collision - top to bottom
+                elif enemy.vel_y > 0:
                     enemy.vel_y = -enemy.vel_y
-                if enemy.rect.left < map.rect.right and enemy.rect.right > map.rect.left:
-                    #  and map.rect.top < enemy.rect.center < map.rect.down
-                    enemy.vel_x = -enemy.vel_x
-            """
-            """
-            if enemy.rect.left < 0 or enemy.rect.right > WIDTH:
-                enemy.vel_x = -enemy.vel_x
-            if enemy.rect.top < 0 or enemy.rect.bottom > HEIGHT:
-                enemy.vel_y = -enemy.vel_y
-            """
+                    enemy.rect.bottom = map.rect.top - 5
 
         # Check if Mario collides with a block
         blocks_collided = pygame.sprite.spritecollide(player, block_sprites_group, True)
@@ -545,9 +562,12 @@ def game():
                 all_sprites_group.add(block)
                 block_sprites_group.add(block)
                 # delet over lapped blocks
-            for map in map_sprites_group:
-                blocks_collided = pygame.sprite.spritecollide(map, block_sprites_group, True)
-
+            if a == 1:
+                for map in white_map_sprites_group:
+                    blocks_collided = pygame.sprite.spritecollide(map, block_sprites_group, True)
+            else:
+                for map in black_map_sprites_group:
+                    blocks_collided = pygame.sprite.spritecollide(map, block_sprites_group, True)
             enemy = Enemy()
             enemy.vel_x, enemy.vel_y = random.choice([-5, -3, -1, 1, 3, 5]), random.choice([-5, -3, -1, 1, 3, 5])
             enemy.rect.center = (WIDTH/2, HEIGHT/2)
@@ -562,7 +582,16 @@ def game():
             done = True
 
         # ------ DRAWING TO SCREEN
-        screen.fill(WHITE)
+        if keys[pygame.K_SPACE]:
+            pressing_space = True
+        elif pressing_space and not keys[pygame.K_SPACE]:
+            a = -a
+            pressing_space = False
+
+        if a == 1:
+            screen.fill(WHITE)
+        else:
+            screen.fill(BLACK)
 
         # Draw all the sprites
         all_sprites_group.draw(screen)
