@@ -288,7 +288,6 @@ def spawn_border():
     for border in [border_up, border_right, border_down, border_left]:
         all_sprites_group.add(border)
         border_sprites_group.add(border)
-        map_sprites_group.add(border)
 
 def game():
     pygame.init()
@@ -379,7 +378,6 @@ def game():
 
     all_sprites_group.add(tree_bottom)
     map_sprites_group.add(tree_bottom)
-    border_sprites_group.add(tree_bottom)
     # tree height
     for i in range(20):
         tree = Tree()
@@ -418,10 +416,10 @@ def game():
         keys = pygame.key.get_pressed()
 
         if a == 1:
-            map_collided = pygame.sprite.spritecollide(player, black_map_sprites_group, False)
+            map_collided = pygame.sprite.spritecollide(enemy, white_map_sprites_group, False)
         else:
-            map_collided = pygame.sprite.spritecollide(player, white_map_sprites_group, False)
-        border_collided = pygame.sprite.spritecollide(player, border_sprites_group, False)
+            map_collided = pygame.sprite.spritecollide(enemy, black_map_sprites_group, False)
+
 
         # pushing_blocks = pygame.sprite.spritecollide(player, push_block_sprites_group, False)
 
@@ -435,7 +433,7 @@ def game():
                 move(push_block, vel)
         """
 
-        if not map_collided and not border_collided:
+        if not map_collided:
             # map move
             for push_block in white_map_sprites_group:
                 move(push_block, vel)
@@ -508,16 +506,10 @@ def game():
         for enemy in enemy_sprites_group:
             enemy.rect.x += enemy.vel_x
             if a == 1:
-                for black_map in black_map_sprites_group:
-                    map_sprites_group.add(black_map)
-                for white_map in white_map_sprites_group:
-                    map_sprites_group.remove(white_map)
+                enemy_collide_map = pygame.sprite.spritecollide(enemy, white_map_sprites_group, False)
             else:
-                for white_map in white_map_sprites_group:
-                    map_sprites_group.add(white_map)
-                for black_map in black_map_sprites_group:
-                    map_sprites_group.remove(black_map)
-            enemy_collide_map = pygame.sprite.spritecollide(enemy, map_sprites_group, False)
+                enemy_collide_map = pygame.sprite.spritecollide(enemy, black_map_sprites_group, False)
+
             for map in enemy_collide_map:
                 # x collision - left to right
                 if enemy.vel_x > 0:
@@ -530,17 +522,10 @@ def game():
 
             enemy.rect.y += enemy.vel_y
             if a == 1:
-                for black_map in black_map_sprites_group:
-                    map_sprites_group.add(black_map)
-                for white_map in white_map_sprites_group:
-                    map_sprites_group.remove(white_map)
+                enemy_collide_map = pygame.sprite.spritecollide(enemy, white_map_sprites_group, False)
             else:
-                for white_map in white_map_sprites_group:
-                    map_sprites_group.add(white_map)
-                for black_map in black_map_sprites_group:
-                    map_sprites_group.remove(black_map)
+                enemy_collide_map = pygame.sprite.spritecollide(enemy, black_map_sprites_group, False)
 
-            enemy_collide_map = pygame.sprite.spritecollide(enemy, map_sprites_group, False)
             for map in enemy_collide_map:
                 if enemy.vel_y < 0:
                     enemy.vel_y = -enemy.vel_y
@@ -571,8 +556,7 @@ def game():
             for _ in range(num_blocks):
                 block = Block()
                 block.rect.center = (random.randint(centerx - map_size, centerx + map_size), random.randint(centery - map_size, centery + map_size))
-                for map in map_sprites_group:
-                    blocks_collided = pygame.sprite.spritecollide(map, block_sprites_group, True)
+
                 block.level_up(level)
 
                 all_sprites_group.add(block)
