@@ -28,6 +28,8 @@ def trajectory(theta, d):
             return " "
         elif -90 < space < -10:
             return ""
+        else:
+            return ""
 
     print("-" * 55)
     print(f"Low angle: {math.degrees(r_low):.2f} degrees, Time: {t_low:.2f} seconds")
