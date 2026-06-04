@@ -2,7 +2,7 @@ import math
 
 def trajectory(theta, d):
     vi = 76
-    g = 9.8
+    g = 10
 
     x = d * math.cos(theta)
     y = d * math.sin(theta)
