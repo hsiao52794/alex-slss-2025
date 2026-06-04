@@ -43,7 +43,7 @@ def trajectory(theta, d):
 stop = False
 while not stop:
     print()
-    print("-" * 60)
+    print("-" * 75)
     theta = int(input("Enter the angle of elevation (in degrees): "))
     d = int(input("Enter the distance to the target (in meters): "))
     trajectory(math.radians(theta), d)
